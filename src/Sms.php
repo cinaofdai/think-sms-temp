@@ -7,9 +7,7 @@
  */
 
 namespace dh2y\sms;
-
-
-use think\Config;
+use think\facade\Config;
 
 
 /** .-----------------------------使用说明---------------------------------
@@ -47,7 +45,7 @@ class Sms
      * @throws \Exception
      */
     private function __construct($config = array()){
-        if(empty( $config )&& $C = Config::get('sms')){
+        if(empty( $config )&& $C = Config::get('sms.')){
             $config = $C['SMS_SDK'];
             $this->scene = $C['SMS_SCENE'];
             $this->test = $C['IS_TEST'];
