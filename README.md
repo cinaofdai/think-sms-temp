@@ -11,9 +11,19 @@ composer require dh2y/think-sms-temp
 或者
 
 ### 二、require安装
+
+#### thinkphp5.0安装
+
 ```
 "require": {
-        "dh2y/think-sms-temp":"*"
+        "dh2y/think-sms-temp":"1.*"
+},
+```
+#### thinkphp5.1安装
+
+```
+"require": {
+        "dh2y/think-sms-temp":"2.*"
 },
 ```
 
