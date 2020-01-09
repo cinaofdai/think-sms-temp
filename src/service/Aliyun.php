@@ -9,13 +9,13 @@ namespace dh2y\sms\service;
 
 
 /** .-----------------------------配置说明---------------------------------
- * |    只需要配置 account(上海建周账号)和  password(上海建周密码)
+ * |    只需要配置 account(阿里大鱼accessKeyId )和  password(阿里大鱼accessKeySecret)
  * |------------------------------配置方法---------------------------------
  * |   'SMS_SDK' => array(
  * |        'class' => 'Aliyun',
  * |        'account' => 'demo',
  * |        'password'=> '12345',
- * |        'signature' => '【XXXX】'   //签名
+ * |        'signature' => 'XXXX'   //签名
  * |   )
  * |   new Sms(config('SMS_SDK'))
  * '-------------------------------------------------------------------*/

@@ -11,6 +11,20 @@ namespace dh2y\sms\service;
 
 use dh2y\sms\service\yuntongxun\REST;
 
+
+/** .-----------------------------配置说明---------------------------------
+ * |    只需要配置 account(容联.云通讯accountSid)和  password(容联.云通讯accountToken) app_id(容联.云通讯appId)
+ * |------------------------------配置方法---------------------------------
+ * |   'SMS_SDK' => array(
+ * |        'class' => 'Yuntongxun',
+ * |        'account' => 'demo',
+ * |        'password'=> '12345',
+ * |        'app_id'=> '12345',
+ * |        'signature' => 'XXXX'   //签名
+ * |   )
+ * |   new Sms(config('SMS_SDK'))
+ * '-------------------------------------------------------------------*/
+
 class Yuntongxun extends TemplateInterface
 {
 
