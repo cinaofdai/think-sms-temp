@@ -9,6 +9,12 @@
 namespace dh2y\sms\service;
 
 
+use TencentCloud\Common\Credential;
+use TencentCloud\Common\Profile\ClientProfile;
+use TencentCloud\Common\Profile\HttpProfile;
+use TencentCloud\Common\Exception\TencentCloudSDKException;
+use TencentCloud\Sms\V20190711\SmsClient;
+use TencentCloud\Sms\V20190711\Models\SendSmsRequest;
 /** .-----------------------------配置说明---------------------------------
  * |    只需要配置 account(腾讯云短信AppID )和  password(腾讯云短信App Key)
  * |------------------------------配置方法---------------------------------
@@ -25,7 +31,7 @@ namespace dh2y\sms\service;
 class Tencent extends TemplateInterface
 {
 
-    protected $baseUrl = 'sms.tencentcloudapi.com';
+    protected $baseUrl = 'https://yun.tim.qq.com/v5/tlssmssvr/sendsms';
 
     /**
      * 发送短信
@@ -36,23 +42,33 @@ class Tencent extends TemplateInterface
      */
     public function sendSms($phone, $code, $param)
     {
-        $random = $this->getRandom();
+        $random = rand(100000, 999999);
         $curTime = time();
         $wholeUrl = $this->baseUrl . "?sdkappid=" . $this->account . "&random=" . $random;
+
         // 按照协议组织 post 包体
         $data = new \stdClass();
         $tel = new \stdClass();
-        $tel->nationcode = "86";
+        $tel->nationcode = ""."86";
         $tel->mobile = "".$phone;
+
         $data->tel = $tel;
-        $data->sig = $this->calculateSigForTempl($this->password, $random,$curTime, $phone);
+        $data->sig = $this->sign($this->password, $random,$curTime, $phone);
         $data->tpl_id = $code;
-        $data->params = $param;
-        $data->sign = $this->signature;  //短信签名
+        $data->params = array_values($param);
+        $data->sign = $this->signature;
         $data->time = $curTime;
-        $data->extend = '';
-        $data->ext = '';
-        return $this->sendCurlPost($wholeUrl, $data);
+        $data->extend = "";
+        $data->ext = "";
+
+        $result =  $this->sendCurlPost($wholeUrl, $data);
+        $rsp = json_decode($result);
+
+        if($rsp->result==0&&$rsp->errmsg=='OK'){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -75,15 +91,23 @@ class Tencent extends TemplateInterface
         // TODO: Implement getRequestUrl() method.
     }
 
-
-
     /**
-     * 生成随机数
-     * @return int 随机数结果
+     * 生成签名
+     * @param string $appkey        sdkappid对应的appkey
+     * @param string $random        随机正整数
+     * @param string $curTime       当前时间
+     * @param array  $phoneNumber   手机号码
+     * @return string  签名结果
      */
-    public function getRandom()
-    {
-        return rand(100000, 999999);
+    public function sign($appkey, $random, $curTime, $phoneNumber){
+        $phoneNumbers = array($phoneNumber);
+
+        $phoneNumbersString = $phoneNumbers[0];
+        for ($i = 1; $i < count($phoneNumbers); $i++) {
+            $phoneNumbersString .= ("," . $phoneNumbers[$i]);
+        }
+
+        return hash("sha256", "appkey=".$appkey."&random=".$random."&time=".$curTime."&mobile=".$phoneNumbersString);
     }
 
     /**
@@ -92,8 +116,7 @@ class Tencent extends TemplateInterface
      * @param array  $dataObj  请求内容
      * @return string 应答json字符串
      */
-    public function sendCurlPost($url, $dataObj)
-    {
+    public function sendCurlPost($url, $dataObj){
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HEADER, 0);
@@ -103,6 +126,7 @@ class Tencent extends TemplateInterface
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($dataObj));
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+
         $ret = curl_exec($curl);
         if (false == $ret) {
             // curl_exec failed
@@ -116,42 +140,11 @@ class Tencent extends TemplateInterface
                 $result = $ret;
             }
         }
+
         curl_close($curl);
+
         return $result;
     }
 
 
-
-    /**
-     * 生成签名
-     * @param string $appkey        sdkappid对应的appkey
-     * @param string $random        随机正整数
-     * @param string $curTime       当前时间
-     * @param array  $phoneNumber   手机号码
-     * @return string  签名结果
-     */
-    public function calculateSigForTempl($appkey, $random, $curTime, $phoneNumber)
-    {
-        $phoneNumbers = [$phoneNumber];
-        return $this->calculateSigForTemplAndPhoneNumbers($appkey, $random,
-            $curTime, $phoneNumbers);
-    }
-
-    /**
-     * 生成签名
-     * @param string $appkey        sdkappid对应的appkey
-     * @param string $random        随机正整数
-     * @param string $curTime       当前时间
-     * @param array  $phoneNumbers  手机号码
-     * @return string  签名结果
-     */
-    public function calculateSigForTemplAndPhoneNumbers($appkey, $random,$curTime, $phoneNumbers)
-    {
-        $phoneNumbersString = $phoneNumbers[0];
-        for ($i = 1; $i < count($phoneNumbers); $i++) {
-            $phoneNumbersString .= ("," . $phoneNumbers[$i]);
-        }
-        return hash("sha256", "appkey=".$appkey."&random=".$random
-            ."&time=".$curTime."&mobile=".$phoneNumbersString);
-    }
 }
