@@ -9,12 +9,6 @@
 namespace dh2y\sms\service;
 
 
-use TencentCloud\Common\Credential;
-use TencentCloud\Common\Profile\ClientProfile;
-use TencentCloud\Common\Profile\HttpProfile;
-use TencentCloud\Common\Exception\TencentCloudSDKException;
-use TencentCloud\Sms\V20190711\SmsClient;
-use TencentCloud\Sms\V20190711\Models\SendSmsRequest;
 /** .-----------------------------配置说明---------------------------------
  * |    只需要配置 account(腾讯云短信AppID )和  password(腾讯云短信App Key)
  * |------------------------------配置方法---------------------------------
